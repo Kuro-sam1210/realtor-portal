@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { AuthLayout } from "@/app/_components/AuthLayout";
 import { login } from "@/app/actions";
-import { authButton, authInput, authLabel } from "@/lib/ui";
+import { AuthShell, Field } from "@/app/auth-shell";
+import { button } from "@/lib/ui";
 
 export default async function Login({
   searchParams,
@@ -11,45 +11,24 @@ export default async function Login({
   const { error, notice } = await searchParams;
 
   return (
-    <AuthLayout>
+    <AuthShell>
       <form action={login}>
-        {notice && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-900">{notice}</p>}
+        {notice && <p className="mb-4 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">{notice}</p>}
         {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
-        <label htmlFor="email" className={authLabel}>
-          Email
-        </label>
-        <input id="email" name="email" type="email" placeholder="Email" required className={authInput} />
+        <Field name="email" title="Email" type="email" placeholder="Email" required />
+        <Field name="password" title="Password" type="password" placeholder="Password" required />
 
-        <label htmlFor="password" className={`${authLabel} mt-6`}>
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="Password"
-          required
-          className={authInput}
-        />
-
-        <button type="submit" className={`${authButton} mt-6`}>
+        <button type="submit" className={`${button} mt-2 w-full py-3`}>
           Login
         </button>
-
-        <p className="mt-4 text-right">
-          <Link href="/forgot-password" className="text-base text-zinc-600 hover:text-zinc-900">
-            Forgot Password
-          </Link>
-        </p>
-
-        <p className="mt-8 text-center text-base text-zinc-700">
-          <strong>Not a member ?</strong>{" "}
-          <Link href="/register" className="text-zinc-600 hover:text-zinc-900">
-            Create new account
+        <p className="my-5 text-center text-sm text-zinc-600">
+          No account yet ?{" "}
+          <Link href="/register" className="font-semibold text-brand">
+            Register
           </Link>
         </p>
       </form>
-    </AuthLayout>
+    </AuthShell>
   );
 }

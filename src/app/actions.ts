@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { SUPABASE_MISSING, createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { cookies, headers } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+import { DEMO_COOKIE, DEMO_NOTICE, isDemo } from "@/lib/demo";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -24,7 +25,11 @@ export async function register(form: FormData) {
   if (form.get("terms") !== "on") {
     fail("/register", "You must agree to the terms.", refQuery);
   }
-  if (!isSupabaseConfigured) fail("/register", SUPABASE_MISSING, refQuery);
+
+  if (isDemo) {
+    (await cookies()).set(DEMO_COOKIE, fullName, { httpOnly: true, sameSite: "lax" });
+    redirect("/dashboard");
+  }
 
   const supabase = await createClient();
 
@@ -63,7 +68,10 @@ export async function register(form: FormData) {
 }
 
 export async function login(form: FormData) {
-  if (!isSupabaseConfigured) fail("/login", SUPABASE_MISSING);
+  if (isDemo) {
+    (await cookies()).set(DEMO_COOKIE, "Demo Realtor", { httpOnly: true, sameSite: "lax" });
+    redirect("/dashboard");
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -74,23 +82,11 @@ export async function login(form: FormData) {
   redirect("/dashboard");
 }
 
-export async function requestPasswordReset(form: FormData) {
-  const email = text(form, "email");
-  if (!email) fail("/forgot-password", "Enter the email you registered with.");
-  if (!isSupabaseConfigured) fail("/forgot-password", SUPABASE_MISSING);
-
-  const supabase = await createClient();
-  const origin = (await headers()).get("origin") ?? "";
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback`,
-  });
-  if (error) fail("/forgot-password", error.message);
-
-  redirect(`/login?notice=${encodeURIComponent("Check your email for a password reset link.")}`);
-}
-
 export async function logout() {
-  if (!isSupabaseConfigured) redirect("/login");
+  if (isDemo) {
+    (await cookies()).delete(DEMO_COOKIE);
+    redirect("/login");
+  }
 
   const supabase = await createClient();
   await supabase.auth.signOut();
@@ -99,6 +95,8 @@ export async function logout() {
 
 // Admin-only: enforced by row level security, not by this function.
 export async function recordSale(form: FormData) {
+  if (isDemo) redirect("/admin?notice=" + encodeURIComponent(DEMO_NOTICE));
+
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login");
@@ -125,6 +123,8 @@ export async function recordSale(form: FormData) {
 }
 
 export async function setCommissionRate(form: FormData) {
+  if (isDemo) redirect("/admin?notice=" + encodeURIComponent(DEMO_NOTICE));
+
   const rate = Number(text(form, "commission_percent"));
   if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
     fail("/admin", "Commission rate must be between 0 and 100.");
