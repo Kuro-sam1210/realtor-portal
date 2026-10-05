@@ -1,22 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { recordSale, setCommissionRate } from "@/app/actions";
-import { createClient } from "@/lib/supabase/server";
+import { getAdmin, isSignedIn } from "@/lib/data";
 import { GROUP_NAME, button, card, day, input, label, money, td, th } from "@/lib/ui";
-
-type Member = {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  ref_code: string;
-  premium_star_id: string | null;
-  bank_name: string | null;
-  account_name: string | null;
-  account_number: string | null;
-};
-type Sale = { id: number; seller_id: string; property_type: string; description: string; amount: number; sold_on: string };
-type Commission = { sale_id: number; beneficiary_id: string; amount: number };
 
 export default async function Admin({
   searchParams,
@@ -24,41 +10,25 @@ export default async function Admin({
   searchParams: Promise<{ error?: string; notice?: string }>;
 }) {
   const { error, notice } = await searchParams;
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login");
+  if (!(await isSignedIn())) redirect("/login");
 
-  const { data: isAdmin } = await supabase.rpc("is_admin");
-  if (!isAdmin) redirect("/dashboard");
+  const data = await getAdmin();
+  if (!data) redirect("/dashboard");
 
-  const [membersResult, salesResult, commissionsResult, settings] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, full_name, email, phone, ref_code, premium_star_id, bank_name, account_name, account_number")
-      .order("full_name"),
-    supabase
-      .from("sales")
-      .select("id, seller_id, property_type, description, amount, sold_on")
-      .order("created_at", { ascending: false }),
-    supabase.from("commissions").select("sale_id, beneficiary_id, amount"),
-    supabase.from("settings").select("commission_percent").single(),
-  ]);
-
-  const members = (membersResult.data ?? []) as Member[];
-  const sales = (salesResult.data ?? []) as Sale[];
+  const { members, sales, rate } = data;
   const name = new Map(members.map((m) => [m.id, m.full_name]));
-  const commissionBySale = new Map(((commissionsResult.data ?? []) as Commission[]).map((c) => [c.sale_id, c]));
+  const commissionBySale = new Map(data.commissions.map((c) => [c.sale_id, c]));
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-emerald-800">{GROUP_NAME} · Admin</h1>
-        <Link href="/dashboard" className="text-sm font-semibold text-emerald-700">
+        <h1 className="text-lg font-bold text-brand-dark">{GROUP_NAME} · Admin</h1>
+        <Link href="/dashboard" className="text-sm font-semibold text-brand">
           Dashboard
         </Link>
       </header>
 
-      {notice && <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{notice}</p>}
+      {notice && <p className="mb-4 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">{notice}</p>}
       {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-3">
@@ -126,7 +96,7 @@ export default async function Admin({
             max="100"
             step="0.01"
             required
-            defaultValue={settings.data?.commission_percent}
+            defaultValue={rate}
             className={input}
           />
           <p className="mt-2 text-xs text-zinc-500">Applies to sales recorded from now on.</p>

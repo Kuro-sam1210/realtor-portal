@@ -2,35 +2,14 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/actions";
-import { createClient } from "@/lib/supabase/server";
+import { getDashboard } from "@/lib/data";
 import { GROUP_NAME, card, day, input, money, td, th } from "@/lib/ui";
 
-type Line = { id: string; full_name: string; email: string; phone: string | null; city: string | null; created_at: string };
-type Commission = { id: number; seller_id: string; rate_percent: number; amount: number; created_at: string };
-
 export default async function Dashboard() {
-  const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) redirect("/login");
+  const data = await getDashboard();
+  if (!data) redirect("/login");
 
-  const [profile, star, lines, commissions, notifications] = await Promise.all([
-    supabase.from("profiles").select("full_name, ref_code, is_admin").eq("id", auth.user.id).single(),
-    supabase.rpc("my_premium_star").maybeSingle<{ full_name: string; email: string; phone: string | null }>(),
-    supabase.rpc("my_premium_lines"),
-    // Filtered explicitly because admins can read every commission.
-    supabase
-      .from("commissions")
-      .select("id, seller_id, rate_percent, amount, created_at")
-      .eq("beneficiary_id", auth.user.id)
-      .order("created_at", { ascending: false }),
-    supabase.from("notifications").select("id, body, created_at").order("created_at", { ascending: false }).limit(20),
-  ]);
-
-  const me = profile.data;
-  if (!me) redirect("/login?error=" + encodeURIComponent("Your profile could not be loaded."));
-
-  const premiumLines = (lines.data ?? []) as Line[];
-  const earned = (commissions.data ?? []) as Commission[];
+  const { me, star, lines: premiumLines, earnings: earned, notifications } = data;
   const lineName = new Map(premiumLines.map((line) => [line.id, line.full_name]));
   const total = earned.reduce((sum, c) => sum + Number(c.amount), 0);
 
@@ -43,12 +22,12 @@ export default async function Dashboard() {
     <main className="mx-auto max-w-5xl px-4 py-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-emerald-800">{GROUP_NAME}</h1>
+          <h1 className="text-lg font-bold text-brand-dark">{GROUP_NAME}</h1>
           <p className="text-sm text-zinc-600">Welcome, {me.full_name}</p>
         </div>
         <div className="flex items-center gap-4 text-sm">
           {me.is_admin && (
-            <Link href="/admin" className="font-semibold text-emerald-700">
+            <Link href="/admin" className="font-semibold text-brand">
               Admin
             </Link>
           )}
@@ -71,12 +50,12 @@ export default async function Dashboard() {
 
         <section className={card}>
           <h2 className="mb-2 font-semibold">Your premium-star</h2>
-          {star.data ? (
+          {star ? (
             <p className="text-sm text-zinc-800">
-              <strong>{star.data.full_name}</strong>
+              <strong>{star.full_name}</strong>
               <br />
-              {star.data.email}
-              {star.data.phone && <> · {star.data.phone}</>}
+              {star.email}
+              {star.phone && <> · {star.phone}</>}
             </p>
           ) : (
             <p className="text-sm text-zinc-600">You joined without a referral link, so you have no premium-star.</p>
@@ -117,7 +96,7 @@ export default async function Dashboard() {
 
         <section className={card}>
           <h2 className="mb-2 font-semibold">Your commissions</h2>
-          <p className="mb-3 text-2xl font-bold text-emerald-800">{money(total)}</p>
+          <p className="mb-3 text-2xl font-bold text-brand-dark">{money(total)}</p>
           {earned.length === 0 ? (
             <p className="text-sm text-zinc-600">No commission yet. You earn when a premium-line sells land or a house.</p>
           ) : (
@@ -136,11 +115,11 @@ export default async function Dashboard() {
 
         <section className={card}>
           <h2 className="mb-2 font-semibold">Notifications</h2>
-          {(notifications.data ?? []).length === 0 ? (
+          {notifications.length === 0 ? (
             <p className="text-sm text-zinc-600">Nothing yet.</p>
           ) : (
             <ul className="divide-y divide-zinc-100 text-sm">
-              {(notifications.data ?? []).map((n) => (
+              {notifications.map((n) => (
                 <li key={n.id} className="py-2">
                   {n.body}
                   <span className="block text-xs text-zinc-500">{day(n.created_at)}</span>

@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { DEMO_COOKIE, DEMO_NOTICE, isDemo } from "@/lib/demo";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -23,6 +24,11 @@ export async function register(form: FormData) {
   }
   if (form.get("terms") !== "on") {
     fail("/register", "You must agree to the terms.", refQuery);
+  }
+
+  if (isDemo) {
+    (await cookies()).set(DEMO_COOKIE, fullName, { httpOnly: true, sameSite: "lax" });
+    redirect("/dashboard");
   }
 
   const supabase = await createClient();
@@ -62,6 +68,11 @@ export async function register(form: FormData) {
 }
 
 export async function login(form: FormData) {
+  if (isDemo) {
+    (await cookies()).set(DEMO_COOKIE, "Demo Realtor", { httpOnly: true, sameSite: "lax" });
+    redirect("/dashboard");
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: text(form, "email"),
@@ -72,6 +83,11 @@ export async function login(form: FormData) {
 }
 
 export async function logout() {
+  if (isDemo) {
+    (await cookies()).delete(DEMO_COOKIE);
+    redirect("/login");
+  }
+
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
@@ -79,6 +95,8 @@ export async function logout() {
 
 // Admin-only: enforced by row level security, not by this function.
 export async function recordSale(form: FormData) {
+  if (isDemo) redirect("/admin?notice=" + encodeURIComponent(DEMO_NOTICE));
+
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login");
@@ -105,6 +123,8 @@ export async function recordSale(form: FormData) {
 }
 
 export async function setCommissionRate(form: FormData) {
+  if (isDemo) redirect("/admin?notice=" + encodeURIComponent(DEMO_NOTICE));
+
   const rate = Number(text(form, "commission_percent"));
   if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
     fail("/admin", "Commission rate must be between 0 and 100.");
