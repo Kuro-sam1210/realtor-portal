@@ -3,7 +3,16 @@ import type { ReactNode } from "react";
 import { logout } from "@/app/actions";
 import { GROUP_NAME } from "@/lib/ui";
 
-const navLink = "flex items-center gap-3 px-6 py-3 text-sm text-zinc-300 hover:bg-slate-700 hover:text-white";
+const navLink = "navlink flex items-center gap-3 py-3 text-sm text-zinc-300 hover:bg-slate-700 hover:text-white";
+
+// Collapsed the sidebar is an icon rail; expanded it shows the labels. The rules
+// hang off the aside because `peer-checked:` only reaches siblings, not their
+// descendants, so each inner change needs an `[&_...]` selector from here.
+const sidebar = [
+  "flex w-16 shrink-0 flex-col bg-slate-800 transition-[width]",
+  "[&_.wide-only]:hidden [&_.navlink]:justify-center",
+  "peer-checked:w-64 peer-checked:[&_.wide-only]:block peer-checked:[&_.navlink]:justify-start peer-checked:[&_.navlink]:px-6",
+].join(" ");
 
 // Sidebar collapse is a CSS-only toggle so the shell stays a server component.
 export function PortalShell({
@@ -19,12 +28,12 @@ export function PortalShell({
     <div className="flex min-h-screen bg-zinc-100">
       <input type="checkbox" id="sidebar-toggle" className="peer sr-only" defaultChecked />
 
-      <aside className="hidden w-64 shrink-0 flex-col bg-slate-800 md:peer-checked:flex">
-        <div className="bg-white px-6 py-5">
-          <span className="text-xl font-bold text-slate-800">{GROUP_NAME}</span>
+      <aside className={sidebar}>
+        <div className="flex h-[61px] items-center overflow-hidden bg-white px-4">
+          <span className="truncate text-xl font-bold text-slate-800">{GROUP_NAME}</span>
         </div>
 
-        <div className="px-4 py-4">
+        <div className="wide-only px-4 py-4">
           <p className="mb-3 text-center text-sm font-bold text-white">{userName}</p>
           <div className="flex items-center rounded-md border border-slate-600 bg-slate-700 px-3">
             <input
@@ -39,21 +48,21 @@ export function PortalShell({
 
         <nav className="flex flex-col py-2">
           <Link href="/" className={navLink}>
-            <Icon name="search" className="h-4 w-4" />
-            Main website
+            <Icon name="search" className="h-4 w-4 shrink-0" />
+            <span className="wide-only">Main website</span>
           </Link>
           <Link href="/dashboard" className={navLink}>
-            <Icon name="search" className="h-4 w-4" />
-            Dashboard
+            <Icon name="search" className="h-4 w-4 shrink-0" />
+            <span className="wide-only">Dashboard</span>
           </Link>
           <Link href="/downlines" className={navLink}>
-            <Icon name="users" className="h-4 w-4" />
-            Downlines
+            <Icon name="users" className="h-4 w-4 shrink-0" />
+            <span className="wide-only">Downlines</span>
           </Link>
           {isAdmin && (
             <Link href="/admin" className={navLink}>
-              <Icon name="gear" className="h-4 w-4" />
-              Admin
+              <Icon name="gear" className="h-4 w-4 shrink-0" />
+              <span className="wide-only">Admin</span>
             </Link>
           )}
         </nav>
