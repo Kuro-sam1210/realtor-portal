@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { recordSale, setCommissionRate } from "@/app/actions";
-import { getAdmin, isSignedIn } from "@/lib/data";
-import { GROUP_NAME, button, card, day, input, label, money, td, th } from "@/lib/ui";
+import { PortalShell } from "@/app/_components/PortalShell";
+import { addProperty, recordSale, setCommissionRate } from "@/app/actions";
+import { getAdmin, getDashboard } from "@/lib/data";
+import { button, card, day, input, label, money, td, th } from "@/lib/ui";
 
 export default async function Admin({
   searchParams,
@@ -10,23 +10,19 @@ export default async function Admin({
   searchParams: Promise<{ error?: string; notice?: string }>;
 }) {
   const { error, notice } = await searchParams;
-  if (!(await isSignedIn())) redirect("/login");
+  const viewer = await getDashboard();
+  if (!viewer) redirect("/login");
 
   const data = await getAdmin();
   if (!data) redirect("/dashboard");
 
-  const { members, sales, rate } = data;
+  const { members, sales, rate, properties } = data;
   const name = new Map(members.map((m) => [m.id, m.full_name]));
   const commissionBySale = new Map(data.commissions.map((c) => [c.sale_id, c]));
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-brand-dark">{GROUP_NAME} · Admin</h1>
-        <Link href="/dashboard" className="text-sm font-semibold text-brand">
-          Dashboard
-        </Link>
-      </header>
+    <PortalShell userName={viewer.me.full_name} isAdmin>
+      <h1 className="mb-4 text-3xl text-zinc-700">Admin</h1>
 
       {notice && <p className="mb-4 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">{notice}</p>}
       {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
@@ -171,7 +167,67 @@ export default async function Admin({
             </table>
           </div>
         </section>
+
+        <form action={addProperty} className={`${card} md:col-span-3`}>
+          <h2 className="mb-3 font-semibold">List a property</h2>
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div>
+              <label htmlFor="name" className={label}>
+                Property name
+              </label>
+              <input id="name" name="name" required className={input} />
+            </div>
+            <div>
+              <label htmlFor="status" className={label}>
+                Status
+              </label>
+              <select id="status" name="status" className={input}>
+                <option>Selling</option>
+                <option>Coming Soon</option>
+                <option>Sold Out</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="price" className={label}>
+                Price
+              </label>
+              <input id="price" name="price" type="number" min="0.01" step="0.01" required className={input} />
+            </div>
+            <div>
+              <label htmlFor="location" className={label}>
+                Location
+              </label>
+              <input id="location" name="location" required className={input} />
+            </div>
+          </div>
+          <button type="submit" className={`${button} mt-4`}>
+            Add property
+          </button>
+
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className={th}>Property</th>
+                  <th className={th}>Status</th>
+                  <th className={th}>Price</th>
+                  <th className={th}>Location</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {properties.map((p) => (
+                  <tr key={p.id}>
+                    <td className={td}>{p.name}</td>
+                    <td className={td}>{p.status}</td>
+                    <td className={td}>{money(p.price)}</td>
+                    <td className={td}>{p.location}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </form>
       </div>
-    </main>
+    </PortalShell>
   );
 }

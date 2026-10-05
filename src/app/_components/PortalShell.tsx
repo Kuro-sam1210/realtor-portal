@@ -26,26 +26,33 @@ export function PortalShell({
 
         <div className="px-4 py-4">
           <p className="mb-3 text-center text-sm font-bold text-white">{userName}</p>
-          <input
-            type="search"
-            placeholder="Search..."
-            aria-label="Search"
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-400 focus:border-brand"
-          />
+          <div className="flex items-center rounded-md border border-slate-600 bg-slate-700 px-3">
+            <input
+              type="search"
+              placeholder="Search..."
+              aria-label="Search"
+              className="w-full min-w-0 bg-transparent py-2 text-sm text-white outline-none placeholder:text-zinc-400"
+            />
+            <Icon name="search" className="h-4 w-4 shrink-0 text-zinc-300" />
+          </div>
         </div>
 
         <nav className="flex flex-col py-2">
           <Link href="/" className={navLink}>
+            <Icon name="search" className="h-4 w-4" />
             Main website
           </Link>
           <Link href="/dashboard" className={navLink}>
+            <Icon name="search" className="h-4 w-4" />
             Dashboard
           </Link>
           <Link href="/downlines" className={navLink}>
+            <Icon name="users" className="h-4 w-4" />
             Downlines
           </Link>
           {isAdmin && (
             <Link href="/admin" className={navLink}>
+              <Icon name="gear" className="h-4 w-4" />
               Admin
             </Link>
           )}
@@ -56,10 +63,10 @@ export function PortalShell({
         <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-5 py-3">
           <label
             htmlFor="sidebar-toggle"
-            className="cursor-pointer px-2 text-xl text-zinc-600 hover:text-zinc-900"
+            className="cursor-pointer px-2 text-zinc-600 hover:text-zinc-900"
             aria-label="Toggle menu"
           >
-            &#9776;
+            <Icon name="menu" className="h-6 w-6" />
           </label>
           <div className="flex items-center gap-3">
             <span
@@ -88,16 +95,72 @@ export function PortalShell({
 }
 
 // One of the orange stat tiles in the row above the panels.
-export function StatTile({ icon, title, value }: { icon: string; title: string; value?: string }) {
+export function StatTile({ icon, title, value }: { icon: IconName; title: string; value?: string }) {
   return (
     <div className="flex bg-white shadow-sm">
-      <div aria-hidden className="flex w-20 shrink-0 items-center justify-center bg-orange-500 text-3xl text-white">
-        {icon}
+      <div aria-hidden className="flex w-24 shrink-0 items-center justify-center bg-orange-500 text-white">
+        <Icon name={icon} className="h-12 w-12" />
       </div>
       <div className="px-4 py-4 text-zinc-700">
         <p className="text-sm">{title}</p>
         {value && <p className="text-xl font-bold">{value}</p>}
       </div>
     </div>
+  );
+}
+
+export type IconName = "gear" | "user" | "cart" | "users" | "search" | "menu";
+
+// Stroked outlines so one set of paths works at sidebar size and tile size.
+const paths: Record<IconName, ReactNode> = {
+  gear: (
+    <>
+      <circle cx="12" cy="12" r="3.25" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+    </>
+  ),
+  cart: (
+    <>
+      <path d="M2 4h2.5l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.55L20.5 7H6" />
+      <circle cx="9.5" cy="20" r="1.5" />
+      <circle cx="17" cy="20" r="1.5" />
+    </>
+  ),
+  users: (
+    <>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2 20v-.8A5.2 5.2 0 0 1 7.2 14h3.6a5.2 5.2 0 0 1 5.2 5.2v.8" />
+      <path d="M16 5.2a3.5 3.5 0 0 1 0 6.8M18.5 14A4 4 0 0 1 22 18v2" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </>
+  ),
+  menu: <path d="M3 6h18M3 12h18M3 18h18" />,
+};
+
+export function Icon({ name, className }: { name: IconName; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {paths[name]}
+    </svg>
   );
 }

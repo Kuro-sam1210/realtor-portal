@@ -141,6 +141,7 @@ export async function getAdmin() {
       sales: demoSales as Sale[],
       commissions: demoCommissions as SaleCommission[],
       rate: demoRate,
+      properties: demoProperties as Property[],
     };
   }
 
@@ -148,7 +149,7 @@ export async function getAdmin() {
   const { data: isAdmin } = await supabase.rpc("is_admin");
   if (!isAdmin) return null;
 
-  const [members, sales, commissions, settings] = await Promise.all([
+  const [members, sales, commissions, settings, properties] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, full_name, email, phone, ref_code, premium_star_id, bank_name, account_name, account_number")
@@ -159,6 +160,7 @@ export async function getAdmin() {
       .order("created_at", { ascending: false }),
     supabase.from("commissions").select("sale_id, beneficiary_id, amount"),
     supabase.from("settings").select("commission_percent").single(),
+    supabase.from("properties").select("id, name, status, price, location").order("created_at", { ascending: false }),
   ]);
 
   return {
@@ -166,5 +168,6 @@ export async function getAdmin() {
     sales: (sales.data ?? []) as Sale[],
     commissions: (commissions.data ?? []) as SaleCommission[],
     rate: Number(settings.data?.commission_percent ?? 0),
+    properties: (properties.data ?? []) as Property[],
   };
 }

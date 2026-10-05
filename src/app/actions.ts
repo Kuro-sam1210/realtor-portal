@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_COOKIE, DEMO_NOTICE, isDemo } from "@/lib/demo";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -61,6 +62,20 @@ export async function register(form: FormData) {
   });
 
   if (error) fail("/register", error.message, refQuery);
+
+  // The trigger has created the profile and its referral code by now.
+  if (data.user) {
+    const { data: cid } = await supabase.rpc("ref_code_for_user", { uid: data.user.id });
+    if (cid) {
+      // A mail failure must not cost the member their account.
+      try {
+        await sendWelcomeEmail({ fullName, cid, email, refLink: `${origin}/?ref=${cid}` });
+      } catch (mailError) {
+        console.error(mailError);
+      }
+    }
+  }
+
   if (!data.session) {
     redirect(`/login?notice=${encodeURIComponent("Check your email to confirm your account, then log in.")}`);
   }
@@ -120,6 +135,31 @@ export async function recordSale(form: FormData) {
 
   revalidatePath("/admin");
   redirect("/admin?notice=" + encodeURIComponent("Sale recorded."));
+}
+
+// Admin-only: enforced by row level security, not by this function.
+export async function addProperty(form: FormData) {
+  if (isDemo) redirect("/admin?notice=" + encodeURIComponent(DEMO_NOTICE));
+
+  const name = text(form, "name");
+  const location = text(form, "location");
+  const price = Number(text(form, "price"));
+  if (!name || !location || !Number.isFinite(price) || price <= 0) {
+    fail("/admin", "Property name, location and a positive price are required.");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("properties").insert({
+    name,
+    location,
+    price,
+    status: text(form, "status") || "Selling",
+  });
+  if (error) fail("/admin", error.message);
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  redirect("/admin?notice=" + encodeURIComponent("Property listed."));
 }
 
 export async function setCommissionRate(form: FormData) {
