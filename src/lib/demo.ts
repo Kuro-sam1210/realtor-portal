@@ -17,6 +17,21 @@ export const demoMembers = (myName: string) => [
   { id: "u4", full_name: "Ibrahim Musa", email: "ibrahim@example.com", phone: "0803 000 0005", ref_code: "752108", premium_star_id: ME, bank_name: "First Bank", account_name: "Ibrahim Musa", account_number: "0567891234", city: "Kano", created_at: "2026-09-29T09:00:00Z" },
 ];
 
+// Second and third generation: premium-lines of u2 and of u5.
+export const demoDeeperMembers = [
+  { id: "u5", full_name: "Chidi Nwosu", email: "chidi@example.com", phone: "0803 000 0006", ref_code: "881204", premium_star_id: "u2", date_of_birth: "1991-04-12", city: "Ibadan", created_at: "2026-09-20T09:00:00Z" },
+  { id: "u6", full_name: "Amina Yusuf", email: "amina@example.com", phone: "0803 000 0007", ref_code: "913557", premium_star_id: "u3", date_of_birth: "1988-11-30", city: "Enugu", created_at: "2026-09-25T09:00:00Z" },
+  { id: "u7", full_name: "Segun Adeyemi", email: "segun@example.com", phone: "0803 000 0008", ref_code: "627440", premium_star_id: "u5", date_of_birth: "1995-02-08", city: "Lagos", created_at: "2026-10-02T09:00:00Z" },
+];
+
+export const demoProperties = [
+  { id: 1, name: "Hypewinds Garden Estate", status: "Selling", price: 15000000, location: "Ibeju Lekki" },
+  { id: 2, name: "Premium Court Phase 2", status: "Selling", price: 22500000, location: "Ibeju Lekki" },
+  { id: 3, name: "Windsor Heights", status: "Selling", price: 34000000, location: "Ajah" },
+  { id: 4, name: "Rockview Terraces", status: "Coming Soon", price: 41000000, location: "Lekki Phase 1" },
+  { id: 5, name: "Greenfield Acres", status: "Sold Out", price: 9500000, location: "Epe" },
+];
+
 export const demoRate = 5;
 
 export const demoSales = [

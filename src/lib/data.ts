@@ -4,8 +4,10 @@ import {
   DEMO_COOKIE,
   DEMO_ME,
   demoCommissions,
+  demoDeeperMembers,
   demoMembers,
   demoNotifications,
+  demoProperties,
   demoRate,
   demoSales,
   demoStar,
@@ -27,6 +29,16 @@ export type Member = {
   account_number: string | null;
 };
 export type Sale = { id: number; seller_id: string; property_type: string; description: string; amount: number; sold_on: string };
+export type Property = { id: number; name: string; status: string; price: number; location: string };
+export type Generation = {
+  generation: number;
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  date_of_birth: string | null;
+  ref_code: string;
+};
 export type SaleCommission = { sale_id: number; beneficiary_id: string; amount: number };
 
 async function demoName() {
@@ -59,6 +71,8 @@ export async function getDashboard() {
       lines: demoMembers(name).filter((m) => m.premium_star_id === DEMO_ME) as Line[],
       earnings: demoCommissions.filter((c) => c.beneficiary_id === DEMO_ME) as Earning[],
       notifications: demoNotifications as Notice[],
+      properties: demoProperties as Property[],
+      memberSince: "2026-08-20T09:00:00Z",
     };
   }
 
@@ -66,8 +80,8 @@ export async function getDashboard() {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
 
-  const [profile, star, lines, earnings, notifications] = await Promise.all([
-    supabase.from("profiles").select("full_name, ref_code, is_admin").eq("id", auth.user.id).single(),
+  const [profile, star, lines, earnings, notifications, properties] = await Promise.all([
+    supabase.from("profiles").select("full_name, ref_code, is_admin, created_at").eq("id", auth.user.id).single(),
     supabase.rpc("my_premium_star").maybeSingle<{ full_name: string; email: string; phone: string | null }>(),
     supabase.rpc("my_premium_lines"),
     // Filtered explicitly because admins can read every commission.
@@ -77,16 +91,44 @@ export async function getDashboard() {
       .eq("beneficiary_id", auth.user.id)
       .order("created_at", { ascending: false }),
     supabase.from("notifications").select("id, body, created_at").order("created_at", { ascending: false }).limit(20),
+    supabase.from("properties").select("id, name, status, price, location").order("created_at", { ascending: false }),
   ]);
   if (!profile.data) return null;
 
+  const me = profile.data as { full_name: string; ref_code: string; is_admin: boolean; created_at: string };
+
   return {
-    me: profile.data as { full_name: string; ref_code: string; is_admin: boolean },
+    me,
     star: star.data,
     lines: (lines.data ?? []) as Line[],
     earnings: (earnings.data ?? []) as Earning[],
     notifications: (notifications.data ?? []) as Notice[],
+    properties: (properties.data ?? []) as Property[],
+    memberSince: me.created_at,
   };
+}
+
+// The three generations below the signed-in member, oldest generation first.
+export async function getGenerations(): Promise<Generation[]> {
+  if (isDemo) {
+    const name = await demoName();
+    if (!name) return [];
+    const first = demoMembers(name).filter((m) => m.premium_star_id === DEMO_ME);
+    const firstIds = first.map((m) => m.id);
+    const second = demoDeeperMembers.filter((m) => firstIds.includes(m.premium_star_id));
+    const secondIds = second.map((m) => m.id);
+    const third = demoDeeperMembers.filter((m) => secondIds.includes(m.premium_star_id));
+
+    return [
+      ...first.map((m) => ({ ...m, date_of_birth: null, generation: 1 })),
+      ...second.map((m) => ({ ...m, generation: 2 })),
+      ...third.map((m) => ({ ...m, generation: 3 })),
+    ] as Generation[];
+  }
+
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("my_premium_generations");
+  return (data ?? []) as Generation[];
 }
 
 // Null when the viewer is not an admin.

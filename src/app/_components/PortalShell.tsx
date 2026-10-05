@@ -16,21 +16,21 @@ export function PortalShell({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-1 bg-zinc-100">
+    <div className="flex min-h-screen bg-zinc-100">
       <input type="checkbox" id="sidebar-toggle" className="peer sr-only" defaultChecked />
 
       <aside className="hidden w-64 shrink-0 flex-col bg-slate-800 md:peer-checked:flex">
-        <div className="bg-slate-900 px-6 py-5">
-          <span className="text-lg font-bold text-white">{GROUP_NAME}</span>
+        <div className="bg-white px-6 py-5">
+          <span className="text-xl font-bold text-slate-800">{GROUP_NAME}</span>
         </div>
 
-        <div className="px-6 py-4">
+        <div className="px-4 py-4">
           <p className="mb-3 text-center text-sm font-bold text-white">{userName}</p>
           <input
             type="search"
             placeholder="Search..."
             aria-label="Search"
-            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-400 focus:border-orange-500"
+            className="w-full rounded-md border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-400 focus:border-brand"
           />
         </div>
 
@@ -41,8 +41,8 @@ export function PortalShell({
           <Link href="/dashboard" className={navLink}>
             Dashboard
           </Link>
-          <Link href="/dashboard#premium-lines" className={navLink}>
-            Premium-lines
+          <Link href="/downlines" className={navLink}>
+            Downlines
           </Link>
           {isAdmin && (
             <Link href="/admin" className={navLink}>
@@ -78,6 +78,10 @@ export function PortalShell({
         </header>
 
         <main className="flex-1 p-5">{children}</main>
+
+        <footer className="bg-zinc-100 px-4 py-6 text-center text-sm text-zinc-600">
+          Copyright &copy; {new Date().getFullYear()} <span className="font-bold text-brand">{GROUP_NAME}</span>
+        </footer>
       </div>
     </div>
   );
