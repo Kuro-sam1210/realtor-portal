@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { AuthLayout } from "@/app/_components/AuthLayout";
 import { register } from "@/app/actions";
-import { createClient } from "@/lib/supabase/server";
-import { GROUP_NAME, button, card, input, label } from "@/lib/ui";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { authButton, authInput, authLabel } from "@/lib/ui";
 
 const fields: { name: string; title: string; type?: string; required?: boolean }[] = [
   { name: "full_name", title: "Full Name", required: true },
@@ -25,20 +26,17 @@ export default async function Register({
   const { ref = "", error } = await searchParams;
 
   let premiumStar: string | null = null;
-  if (ref) {
+  if (ref && isSupabaseConfigured) {
     const supabase = await createClient();
     const { data } = await supabase.rpc("ref_owner", { code: ref });
     premiumStar = data ?? null;
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-center text-xl font-bold text-emerald-800">{GROUP_NAME}</h1>
-      <p className="mb-6 text-center text-sm text-zinc-600">Realtor registration</p>
-
-      <form action={register} className={card}>
+    <AuthLayout wide>
+      <form action={register}>
         {ref && (
-          <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+          <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-900">
             {premiumStar ? (
               <>
                 Your premium-star: <strong>{premiumStar}</strong>
@@ -52,27 +50,28 @@ export default async function Register({
 
         <input type="hidden" name="ref" value={premiumStar ? ref : ""} />
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {fields.map((field) => (
             <div key={field.name}>
-              <label htmlFor={field.name} className={label}>
+              <label htmlFor={field.name} className={authLabel}>
                 {field.title}
               </label>
               <input
                 id={field.name}
                 name={field.name}
                 type={field.type ?? "text"}
+                placeholder={field.title}
                 required={field.required}
                 minLength={field.name === "password" ? 6 : undefined}
-                className={input}
+                className={authInput}
               />
             </div>
           ))}
           <div>
-            <label htmlFor="gender" className={label}>
+            <label htmlFor="gender" className={authLabel}>
               Gender
             </label>
-            <select id="gender" name="gender" className={input} defaultValue="">
+            <select id="gender" name="gender" className={authInput} defaultValue="">
               <option value="">Select</option>
               <option>Male</option>
               <option>Female</option>
@@ -80,20 +79,21 @@ export default async function Register({
           </div>
         </div>
 
-        <label className="mt-5 flex items-center gap-2 text-sm text-zinc-700">
+        <label className="mt-6 flex items-center gap-2 text-base text-zinc-700">
           <input type="checkbox" name="terms" required /> I agree to terms
         </label>
 
-        <button type="submit" className={`${button} mt-5 w-full`}>
+        <button type="submit" className={`${authButton} mt-6`}>
           Register
         </button>
-        <p className="mt-4 text-center text-sm text-zinc-600">
-          Already has an account?{" "}
-          <Link href="/login" className="font-semibold text-emerald-700">
+
+        <p className="mt-8 text-center text-base text-zinc-700">
+          <strong>Already has an account ?</strong>{" "}
+          <Link href="/login" className="text-zinc-600 hover:text-zinc-900">
             Login
           </Link>
         </p>
       </form>
-    </main>
+    </AuthLayout>
   );
 }

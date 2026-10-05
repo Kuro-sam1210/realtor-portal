@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { AuthLayout } from "@/app/_components/AuthLayout";
 import { login } from "@/app/actions";
-import { GROUP_NAME, button, card, input, label } from "@/lib/ui";
+import { authButton, authInput, authLabel } from "@/lib/ui";
 
 export default async function Login({
   searchParams,
@@ -10,34 +11,45 @@ export default async function Login({
   const { error, notice } = await searchParams;
 
   return (
-    <main className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-center text-xl font-bold text-emerald-800">{GROUP_NAME}</h1>
-      <p className="mb-6 text-center text-sm text-zinc-600">Realtor login</p>
-
-      <form action={login} className={card}>
-        {notice && <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{notice}</p>}
+    <AuthLayout>
+      <form action={login}>
+        {notice && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-900">{notice}</p>}
         {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
-        <label htmlFor="email" className={label}>
+        <label htmlFor="email" className={authLabel}>
           Email
         </label>
-        <input id="email" name="email" type="email" required className={input} />
+        <input id="email" name="email" type="email" placeholder="Email" required className={authInput} />
 
-        <label htmlFor="password" className={`${label} mt-4`}>
+        <label htmlFor="password" className={`${authLabel} mt-6`}>
           Password
         </label>
-        <input id="password" name="password" type="password" required className={input} />
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          className={authInput}
+        />
 
-        <button type="submit" className={`${button} mt-5 w-full`}>
+        <button type="submit" className={`${authButton} mt-6`}>
           Login
         </button>
-        <p className="mt-4 text-center text-sm text-zinc-600">
-          No account yet?{" "}
-          <Link href="/register" className="font-semibold text-emerald-700">
-            Register
+
+        <p className="mt-4 text-right">
+          <Link href="/forgot-password" className="text-base text-zinc-600 hover:text-zinc-900">
+            Forgot Password
+          </Link>
+        </p>
+
+        <p className="mt-8 text-center text-base text-zinc-700">
+          <strong>Not a member ?</strong>{" "}
+          <Link href="/register" className="text-zinc-600 hover:text-zinc-900">
+            Create new account
           </Link>
         </p>
       </form>
-    </main>
+    </AuthLayout>
   );
 }

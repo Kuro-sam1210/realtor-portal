@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { SUPABASE_MISSING, createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -24,6 +24,7 @@ export async function register(form: FormData) {
   if (form.get("terms") !== "on") {
     fail("/register", "You must agree to the terms.", refQuery);
   }
+  if (!isSupabaseConfigured) fail("/register", SUPABASE_MISSING, refQuery);
 
   const supabase = await createClient();
 
@@ -62,6 +63,8 @@ export async function register(form: FormData) {
 }
 
 export async function login(form: FormData) {
+  if (!isSupabaseConfigured) fail("/login", SUPABASE_MISSING);
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: text(form, "email"),
@@ -71,7 +74,24 @@ export async function login(form: FormData) {
   redirect("/dashboard");
 }
 
+export async function requestPasswordReset(form: FormData) {
+  const email = text(form, "email");
+  if (!email) fail("/forgot-password", "Enter the email you registered with.");
+  if (!isSupabaseConfigured) fail("/forgot-password", SUPABASE_MISSING);
+
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin") ?? "";
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback`,
+  });
+  if (error) fail("/forgot-password", error.message);
+
+  redirect(`/login?notice=${encodeURIComponent("Check your email for a password reset link.")}`);
+}
+
 export async function logout() {
+  if (!isSupabaseConfigured) redirect("/login");
+
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");

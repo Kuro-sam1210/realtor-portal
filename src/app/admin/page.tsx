@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { recordSale, setCommissionRate } from "@/app/actions";
-import { createClient } from "@/lib/supabase/server";
+import { SUPABASE_MISSING, createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { GROUP_NAME, button, card, day, input, label, money, td, th } from "@/lib/ui";
 
 type Member = {
@@ -24,6 +24,8 @@ export default async function Admin({
   searchParams: Promise<{ error?: string; notice?: string }>;
 }) {
   const { error, notice } = await searchParams;
+  if (!isSupabaseConfigured) redirect("/login?error=" + encodeURIComponent(SUPABASE_MISSING));
+
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login");
@@ -52,13 +54,13 @@ export default async function Admin({
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-emerald-800">{GROUP_NAME} · Admin</h1>
-        <Link href="/dashboard" className="text-sm font-semibold text-emerald-700">
+        <h1 className="text-lg font-bold text-slate-800">{GROUP_NAME} · Admin</h1>
+        <Link href="/dashboard" className="text-sm font-semibold text-orange-600">
           Dashboard
         </Link>
       </header>
 
-      {notice && <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{notice}</p>}
+      {notice && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-900">{notice}</p>}
       {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-3">
