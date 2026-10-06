@@ -104,7 +104,7 @@ export default async function Admin({
         <section className={`${card} md:col-span-3`}>
           <h2 className="mb-2 font-semibold">Sales ({sales.length})</h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px]">
+            <table className="w-full">
               <thead>
                 <tr>
                   <th className={th}>Date</th>
@@ -139,7 +139,7 @@ export default async function Admin({
         <section className={`${card} md:col-span-3`}>
           <h2 className="mb-2 font-semibold">Members ({members.length})</h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px]">
+            <table className="w-full">
               <thead>
                 <tr>
                   <th className={th}>Name</th>
@@ -205,7 +205,7 @@ export default async function Admin({
           </button>
 
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[640px]">
+            <table className="w-full">
               <thead>
                 <tr>
                   <th className={th}>Property</th>

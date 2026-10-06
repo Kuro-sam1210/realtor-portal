@@ -23,10 +23,10 @@ export default async function PremiumLines() {
 
   return (
     <PortalShell userName={data.me.full_name} isAdmin={data.me.is_admin}>
-      <h1 className="mb-3 text-2xl text-zinc-700 sm:text-3xl">Premium-Lines</h1>
+      <h1 className="mb-3 text-3xl text-zinc-700">Premium-Lines</h1>
 
-      <div className={`${panel} p-2 sm:p-5`}>
-        <div className="rounded border border-zinc-200 p-2 sm:p-5">
+      <div className={`${panel} p-5`}>
+        <div className="rounded border border-zinc-200 p-5">
           {GENERATIONS.map(({ level, title }) => (
             <GenerationTable
               key={level}
@@ -52,9 +52,9 @@ function GenerationTable({
 }) {
   return (
     <section className="mb-8 last:mb-0">
-      <h2 className="mb-3 text-xl text-zinc-700 sm:text-2xl">{title}</h2>
+      <h2 className="mb-3 text-2xl text-zinc-700">{title}</h2>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] border border-zinc-200">
+        <table className="w-full border border-zinc-200">
           <thead>
             <tr className="divide-x divide-zinc-200">
               <th className={`${th} text-base normal-case tracking-normal text-zinc-800`}>Username</th>
