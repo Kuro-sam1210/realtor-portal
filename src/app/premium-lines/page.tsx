@@ -10,7 +10,7 @@ const GENERATIONS = [
   { level: 3, title: "Third Generation" },
 ];
 
-export default async function Downlines() {
+export default async function PremiumLines() {
   const data = await getDashboard();
   if (!data) redirect("/login");
 
@@ -23,7 +23,7 @@ export default async function Downlines() {
 
   return (
     <PortalShell userName={data.me.full_name} isAdmin={data.me.is_admin}>
-      <h1 className="mb-3 text-3xl text-zinc-700">User Downlines</h1>
+      <h1 className="mb-3 text-3xl text-zinc-700">Premium-Lines</h1>
 
       <div className={`${panel} p-5`}>
         <div className="rounded border border-zinc-200 p-5">
