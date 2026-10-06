@@ -17,7 +17,8 @@ export default async function Dashboard() {
 
   return (
     <PortalShell userName={me.full_name} isAdmin={me.is_admin}>
-      <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* One across on a phone, two on a tablet, the reference's four on a desktop. */}
+      <div className="mb-5 grid grid-cols-1 gap-4 [@media(min-width:640px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
         <StatTile icon="gear" title={`Welcome Back ${me.full_name}`} />
         <StatTile icon="user" title={`${me.full_name} Member since ${monthYear(memberSince)}`} />
         <StatTile icon="cart" title="COMMISSION" value="Instant Payment" />
@@ -33,7 +34,7 @@ export default async function Dashboard() {
           <p className="px-5 pb-5 text-sm text-zinc-600">No properties have been listed yet.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-y border-zinc-200">
                   <th className={`${th} text-base normal-case tracking-normal text-zinc-700`}>Properties</th>

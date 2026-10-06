@@ -22,15 +22,15 @@ export default async function Admin({
 
   return (
     <PortalShell userName={viewer.me.full_name} isAdmin>
-      <h1 className="mb-4 text-3xl text-zinc-700">Admin</h1>
+      <h1 className="mb-4 text-[clamp(1.5rem,5vw,1.875rem)] text-zinc-700">Admin</h1>
 
       {notice && <p className="mb-4 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">{notice}</p>}
       {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
-      <div className="grid gap-5 md:grid-cols-3">
-        <form action={recordSale} className={`${card} md:col-span-2`}>
+      <div className="grid grid-cols-1 gap-5 [@media(min-width:1024px)]:grid-cols-3">
+        <form action={recordSale} className={`${card} [@media(min-width:1024px)]:col-span-2`}>
           <h2 className="mb-3 font-semibold">Record a sale</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 [@media(min-width:640px)]:grid-cols-2">
             <div>
               <label htmlFor="seller_id" className={label}>
                 Realtor who sold
@@ -67,7 +67,7 @@ export default async function Admin({
               </label>
               <input id="sold_on" name="sold_on" type="date" className={input} />
             </div>
-            <div className="sm:col-span-2">
+            <div className="col-span-full">
               <label htmlFor="description" className={label}>
                 Description
               </label>
@@ -101,10 +101,10 @@ export default async function Admin({
           </button>
         </form>
 
-        <section className={`${card} md:col-span-3`}>
+        <section className={`${card} col-span-full`}>
           <h2 className="mb-2 font-semibold">Sales ({sales.length})</h2>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr>
                   <th className={th}>Date</th>
@@ -136,10 +136,10 @@ export default async function Admin({
           </div>
         </section>
 
-        <section className={`${card} md:col-span-3`}>
+        <section className={`${card} col-span-full`}>
           <h2 className="mb-2 font-semibold">Members ({members.length})</h2>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr>
                   <th className={th}>Name</th>
@@ -168,9 +168,9 @@ export default async function Admin({
           </div>
         </section>
 
-        <form action={addProperty} className={`${card} md:col-span-3`}>
+        <form action={addProperty} className={`${card} col-span-full`}>
           <h2 className="mb-3 font-semibold">List a property</h2>
-          <div className="grid gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 [@media(min-width:640px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
             <div>
               <label htmlFor="name" className={label}>
                 Property name
@@ -205,7 +205,7 @@ export default async function Admin({
           </button>
 
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr>
                   <th className={th}>Property</th>
