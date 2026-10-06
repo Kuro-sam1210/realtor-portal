@@ -55,9 +55,9 @@ export function PortalShell({
             <Icon name="search" className="h-4 w-4 shrink-0" />
             <span className="wide-only">Dashboard</span>
           </Link>
-          <Link href="/premium-lines" className={navLink}>
+          <Link href="/downlines" className={navLink}>
             <Icon name="users" className="h-4 w-4 shrink-0" />
-            <span className="wide-only">Premium-Lines</span>
+            <span className="wide-only">Downlines</span>
           </Link>
           {isAdmin && (
             <Link href="/admin" className={navLink}>
