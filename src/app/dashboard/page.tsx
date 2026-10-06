@@ -33,7 +33,7 @@ export default async function Dashboard() {
           <p className="px-5 pb-5 text-sm text-zinc-600">No properties have been listed yet.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-y border-zinc-200">
                   <th className={`${th} text-base normal-case tracking-normal text-zinc-700`}>Properties</th>
