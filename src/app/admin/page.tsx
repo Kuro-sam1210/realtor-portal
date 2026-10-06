@@ -170,7 +170,7 @@ export default async function Admin({
 
         <form action={addProperty} className={`${card} col-span-full`}>
           <h2 className="mb-3 font-semibold">List a property</h2>
-          <div className="grid grid-cols-1 gap-4 [@media(min-width:640px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 [@media(min-width:640px)_and_(max-width:1023px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
             <div>
               <label htmlFor="name" className={label}>
                 Property name

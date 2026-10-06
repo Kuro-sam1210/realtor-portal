@@ -17,8 +17,10 @@ export default async function Dashboard() {
 
   return (
     <PortalShell userName={me.full_name} isAdmin={me.is_admin}>
-      {/* One across on a phone, two on a tablet, the reference's four on a desktop. */}
-      <div className="mb-5 grid grid-cols-1 gap-4 [@media(min-width:640px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
+      {/* One across on a phone, two on a tablet, the reference's four on a desktop.
+          The ranges may not overlap: this build emits these media blocks unsorted,
+          so two matching rules would be decided by source order, not by width. */}
+      <div className="mb-5 grid grid-cols-1 gap-4 [@media(min-width:640px)_and_(max-width:1023px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
         <StatTile icon="gear" title={`Welcome Back ${me.full_name}`} />
         <StatTile icon="user" title={`${me.full_name} Member since ${monthYear(memberSince)}`} />
         <StatTile icon="cart" title="COMMISSION" value="Instant Payment" />
