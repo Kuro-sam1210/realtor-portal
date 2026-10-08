@@ -5,22 +5,21 @@ import { GROUP_NAME } from "@/lib/ui";
 
 const navLink = "navlink flex items-center gap-3 px-6 py-3 text-sm text-zinc-300 hover:bg-slate-700 hover:text-white";
 
-// Breakpoints are written as full media queries rather than `md:`, which this
-// build does not emit. One checkbox drives both layouts, so unchecked has to be
-// the state each wants on load: the drawer closed on a phone, the sidebar open
-// on a desktop. The inner rules hang off the aside because `peer-checked:`
-// reaches siblings only, never their descendants, hence the `[&_...]` selectors.
+// One checkbox drives both layouts, so unchecked has to be the state each wants
+// on load: the drawer closed on a phone, the sidebar open on a desktop. The
+// inner rules hang off the aside because `peer-checked:` reaches siblings only,
+// never their descendants, hence the `[&_...]` selectors.
 const sidebar = [
   // Phone: an off-canvas drawer that slides over the content.
   "fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto bg-slate-800 transition-transform",
   "peer-checked:translate-x-0",
   // Desktop: back in the flow, and the toggle narrows it to an icon rail.
-  "[@media(min-width:768px)]:static [@media(min-width:768px)]:translate-x-0",
-  "[@media(min-width:768px)]:shrink-0 [@media(min-width:768px)]:transition-[width]",
-  "[@media(min-width:768px)]:peer-checked:w-16",
-  "[@media(min-width:768px)]:peer-checked:[&_.wide-only]:hidden",
-  "[@media(min-width:768px)]:peer-checked:[&_.navlink]:justify-center",
-  "[@media(min-width:768px)]:peer-checked:[&_.navlink]:px-0",
+  "md:static md:translate-x-0",
+  "md:shrink-0 md:transition-[width]",
+  "md:peer-checked:w-16",
+  "md:peer-checked:[&_.wide-only]:hidden",
+  "md:peer-checked:[&_.navlink]:justify-center",
+  "md:peer-checked:[&_.navlink]:px-0",
 ].join(" ");
 
 // Sidebar collapse is a CSS-only toggle so the shell stays a server component.
@@ -41,7 +40,7 @@ export function PortalShell({
       <label
         htmlFor="sidebar-toggle"
         aria-hidden
-        className="fixed inset-0 z-30 hidden bg-black/50 peer-checked:block [@media(min-width:768px)]:peer-checked:hidden"
+        className="fixed inset-0 z-30 hidden bg-black/50 peer-checked:block md:peer-checked:hidden"
       />
 
       <aside className={sidebar}>
@@ -85,7 +84,7 @@ export function PortalShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-2 border-b border-zinc-200 bg-white px-3 py-3 [@media(min-width:640px)]:px-5">
+        <header className="flex items-center justify-between gap-2 border-b border-zinc-200 bg-white px-3 py-3 sm:px-5">
           <label
             htmlFor="sidebar-toggle"
             className="shrink-0 cursor-pointer px-2 text-zinc-600 hover:text-zinc-900"
@@ -109,7 +108,7 @@ export function PortalShell({
           </div>
         </header>
 
-        <main className="flex-1 p-3 [@media(min-width:640px)]:p-5">{children}</main>
+        <main className="flex-1 p-3 sm:p-5">{children}</main>
 
         <footer className="bg-zinc-100 px-4 py-6 text-center text-sm text-zinc-600">
           Copyright &copy; {new Date().getFullYear()} <span className="font-bold text-brand">{GROUP_NAME}</span>
@@ -125,13 +124,13 @@ export function StatTile({ icon, title, value }: { icon: IconName; title: string
     <div className="flex bg-white shadow-sm">
       <div
         aria-hidden
-        className="flex w-20 shrink-0 items-center justify-center bg-orange-500 text-white [@media(min-width:640px)]:w-24"
+        className="flex w-20 shrink-0 items-center justify-center bg-orange-500 text-white sm:w-24"
       >
-        <Icon name={icon} className="h-10 w-10 [@media(min-width:640px)]:h-12 [@media(min-width:640px)]:w-12" />
+        <Icon name={icon} className="h-10 w-10 sm:h-12 sm:w-12" />
       </div>
-      <div className="min-w-0 px-3 py-3 text-zinc-700 [@media(min-width:640px)]:px-4 [@media(min-width:640px)]:py-4">
+      <div className="min-w-0 px-3 py-3 text-zinc-700 sm:px-4 sm:py-4">
         <p className="text-sm">{title}</p>
-        {value && <p className="text-lg font-bold [@media(min-width:640px)]:text-xl">{value}</p>}
+        {value && <p className="text-lg font-bold sm:text-xl">{value}</p>}
       </div>
     </div>
   );

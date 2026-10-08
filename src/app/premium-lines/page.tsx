@@ -25,8 +25,8 @@ export default async function Downlines() {
     <PortalShell userName={data.me.full_name} isAdmin={data.me.is_admin}>
       <h1 className="mb-3 text-[clamp(1.5rem,5vw,1.875rem)] text-zinc-700">User Premium-Lines</h1>
 
-      <div className={`${panel} p-2 [@media(min-width:640px)]:p-5`}>
-        <div className="rounded border border-zinc-200 p-2 [@media(min-width:640px)]:p-5">
+      <div className={`${panel} p-2 sm:p-5`}>
+        <div className="rounded border border-zinc-200 p-2 sm:p-5">
           {GENERATIONS.map(({ level, title }) => (
             <GenerationTable
               key={level}

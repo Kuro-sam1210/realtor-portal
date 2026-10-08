@@ -32,7 +32,6 @@ export default async function Register({
 
         <Field name="full_name" title="Full Name" placeholder="First name last Name" required />
         <Field name="email" title="Email" type="email" placeholder="Email" required />
-        <Field name="password" title="Password" type="password" placeholder="Password" required minLength={6} />
         <Field name="phone" title="Phone" type="tel" placeholder="Mobile Number" required />
         <Field name="city" title="City" placeholder="city" />
         <Field name="date_of_birth" title="Date of birth" type="date" />
@@ -42,6 +41,10 @@ export default async function Register({
         <Field name="bank_name" title="Bank Name" placeholder="Bank name" />
         <Field name="account_name" title="Account Name" placeholder="Account name" />
         <Field name="account_number" title="Account Number" placeholder="Account number" />
+
+        <p className="mb-4 text-sm text-zinc-600">
+          Your password will be emailed to you once you register.
+        </p>
 
         <label className="flex items-center gap-2 text-sm text-zinc-700">
           <input type="checkbox" name="terms" required /> I agree to terms

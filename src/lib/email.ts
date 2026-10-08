@@ -8,15 +8,25 @@ const WHATSAPP_GROUP = process.env.NEXT_PUBLIC_WHATSAPP_GROUP_URL;
 
 export const isMailConfigured = Boolean(API_KEY && FROM);
 
-function body({ fullName, cid, email, refLink }: { fullName: string; cid: string; email: string; refLink: string }) {
-  // The reference mail also lists the password. We leave it out: passwords are
-  // hashed, so we cannot read one back, and mailing it would expose the account.
+function body({
+  fullName,
+  cid,
+  email,
+  password,
+  refLink,
+}: {
+  fullName: string;
+  cid: string;
+  email: string;
+  password: string;
+  refLink: string;
+}) {
   const lines = [
     `Dear ${fullName},`,
     `Welcome to ${GROUP_NAME}. Kindly find below your login details.`,
     `CID (USER ID): ${cid}`,
     `Email: ${email}`,
-    `Sign in with the password you chose when you registered.`,
+    `Password: ${password}`,
     `Your referral link is ${refLink}`,
   ];
   if (WHATSAPP_GROUP) {
@@ -29,6 +39,7 @@ export async function sendWelcomeEmail(details: {
   fullName: string;
   cid: string;
   email: string;
+  password: string;
   refLink: string;
 }) {
   if (!isMailConfigured) return;

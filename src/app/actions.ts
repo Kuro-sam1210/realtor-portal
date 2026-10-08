@@ -5,9 +5,17 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_COOKIE, DEMO_NOTICE, isDemo } from "@/lib/demo";
-import { sendWelcomeEmail } from "@/lib/email";
+import { isMailConfigured, sendWelcomeEmail } from "@/lib/email";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
+
+// Members never choose a password; the portal generates one and mails it.
+// Avoids look-alike characters so it survives being retyped from an email.
+function generatePassword() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("");
+}
 
 function fail(path: string, message: string, extra = ""): never {
   redirect(`${path}?error=${encodeURIComponent(message)}${extra}`);
@@ -17,14 +25,19 @@ export async function register(form: FormData) {
   const ref = text(form, "ref");
   const refQuery = ref ? `&ref=${encodeURIComponent(ref)}` : "";
   const email = text(form, "email");
-  const password = String(form.get("password") ?? "");
   const fullName = text(form, "full_name");
+  const password = generatePassword();
 
-  if (!fullName || !email || password.length < 6) {
-    fail("/register", "Full name, email and a password of at least 6 characters are required.", refQuery);
+  if (!fullName || !email) {
+    fail("/register", "Full name and email are required.", refQuery);
   }
   if (form.get("terms") !== "on") {
     fail("/register", "You must agree to the terms.", refQuery);
+  }
+  // The password only ever reaches the member by email, so without a mail
+  // provider the account would be created and immediately unreachable.
+  if (!isDemo && !isMailConfigured) {
+    fail("/register", "Registration is unavailable right now. Please contact the group admin.", refQuery);
   }
 
   if (isDemo) {
@@ -64,22 +77,23 @@ export async function register(form: FormData) {
   if (error) fail("/register", error.message, refQuery);
 
   // The trigger has created the profile and its referral code by now.
-  if (data.user) {
-    const { data: cid } = await supabase.rpc("ref_code_for_user", { uid: data.user.id });
-    if (cid) {
-      // A mail failure must not cost the member their account.
-      try {
-        await sendWelcomeEmail({ fullName, cid, email, refLink: `${origin}/?ref=${cid}` });
-      } catch (mailError) {
-        console.error(mailError);
-      }
-    }
+  const { data: cid } = data.user
+    ? await supabase.rpc("ref_code_for_user", { uid: data.user.id })
+    : { data: null };
+
+  // The generated password exists nowhere else, so a failed send leaves the
+  // member locked out. Say so rather than dropping them at a login they
+  // cannot pass.
+  try {
+    await sendWelcomeEmail({ fullName, cid: cid ?? "", email, password, refLink: `${origin}/?ref=${cid}` });
+  } catch (mailError) {
+    console.error(mailError);
+    fail("/login", "Your account was created but the welcome email failed. Please contact the group admin.");
   }
 
-  if (!data.session) {
-    redirect(`/login?notice=${encodeURIComponent("Check your email to confirm your account, then log in.")}`);
-  }
-  redirect("/dashboard");
+  redirect(
+    `/login?notice=${encodeURIComponent("Check your email for your CID and password, then log in.")}`,
+  );
 }
 
 export async function login(form: FormData) {

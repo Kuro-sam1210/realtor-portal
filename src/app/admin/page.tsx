@@ -27,10 +27,10 @@ export default async function Admin({
       {notice && <p className="mb-4 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">{notice}</p>}
       {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
-      <div className="grid grid-cols-1 gap-5 [@media(min-width:1024px)]:grid-cols-3">
-        <form action={recordSale} className={`${card} [@media(min-width:1024px)]:col-span-2`}>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <form action={recordSale} className={`${card} lg:col-span-2`}>
           <h2 className="mb-3 font-semibold">Record a sale</h2>
-          <div className="grid grid-cols-1 gap-4 [@media(min-width:640px)]:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="seller_id" className={label}>
                 Realtor who sold
@@ -170,7 +170,7 @@ export default async function Admin({
 
         <form action={addProperty} className={`${card} col-span-full`}>
           <h2 className="mb-3 font-semibold">List a property</h2>
-          <div className="grid grid-cols-1 gap-4 [@media(min-width:640px)_and_(max-width:1023px)]:grid-cols-2 [@media(min-width:1024px)]:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label htmlFor="name" className={label}>
                 Property name
